@@ -241,11 +241,11 @@ if __name__ == "__main__":
         if idx + 1 < len(sys.argv):
             transport = sys.argv[idx + 1]
 
-    # When PORT env var is set (e.g. on Render), run HTTP with uvicorn directly
+    # When PORT env var is set (e.g. on Render), run SSE with uvicorn directly
     render_port = os.environ.get("PORT")
     if render_port:
         import uvicorn
-        app = mcp.streamable_http_app()
+        app = mcp.sse_app()
         uvicorn.run(app, host="0.0.0.0", port=int(render_port))
     elif transport == "http":
         mcp.run(transport="streamable-http")
