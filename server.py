@@ -17,12 +17,14 @@ import json
 import httpx
 from typing import Any
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 # ---------------------------------------------------------------------------
 # Configuration – reads from environment variables
 # ---------------------------------------------------------------------------
 APPIAN_API_KEY = os.environ.get("APPIAN_API_KEY", "")
 APPIAN_BASE_URL = os.environ.get("APPIAN_BASE_URL", "")
+IS_RENDER = bool(os.environ.get("PORT"))
 
 
 # ---------------------------------------------------------------------------
@@ -68,8 +70,8 @@ async def _api_delete(path: str, body: dict | None = None) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # MCP Server
 # ---------------------------------------------------------------------------
-mcp = FastMCP(
-    "Appian CSR Requests",
+_mcp_kwargs = dict(
+    name="Appian CSR Requests",
     instructions=(
         "This server connects to the Appian CSR Request API. "
         "Use these tools to create, retrieve, and delete requests, "
@@ -78,6 +80,15 @@ mcp = FastMCP(
         "Delivery Team (30), PH Trust Accounting (42), and Activate (64)."
     ),
 )
+
+# On Render: bind to 0.0.0.0 and allow the Render hostname
+if IS_RENDER:
+    _mcp_kwargs["host"] = "0.0.0.0"
+    _mcp_kwargs["transport_security"] = TransportSecuritySettings(
+        enable_dns_rebinding_protection=False,
+    )
+
+mcp = FastMCP(**_mcp_kwargs)
 
 
 # ── 1. CREATE REQUEST ────────────────────────────────────────────────────────
