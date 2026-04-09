@@ -246,7 +246,13 @@ if __name__ == "__main__":
     if render_port:
         import uvicorn
         app = mcp.sse_app()
-        uvicorn.run(app, host="0.0.0.0", port=int(render_port))
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=int(render_port),
+            proxy_headers=True,
+            forwarded_allow_ips="*",
+        )
     elif transport == "http":
         mcp.run(transport="streamable-http")
     else:
